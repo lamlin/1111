@@ -1,0 +1,86 @@
+/*单片机实现PWM调节LED灯的亮度*/
+
+#include<reg52.h>
+#define uchar unsigned char
+sbit P2_0=P2^0;
+sbit key1=P3^4;
+sbit key2=P3^5;
+uchar zkb,i;// zkb指占空比
+void delay(uchar z)
+ {
+  uchar x,y;
+  for(x=z;x>0;x--)
+   for(y=110;y>0;y--);
+ }
+ void init()  //初始化函数
+ {
+     TMOD=0X01;
+	 TH0=(65536-10)/256;
+	 TL0=(65536-10)%256;
+	 EA=1;
+	 ET0=1;
+	 TR0=1;
+ }
+ void keyscan()	 //键盘扫描
+  {
+   	P3=0XFF;
+	if(key1==0)
+	 {
+	  delay(5);
+	   if(key1==0)
+	   {
+	    while(!key1);
+	    
+		if(zkb<9)
+		 {
+		   zkb++;
+		 }
+		
+	   }
+	 }
+	if(key2==0)
+	 {
+	  delay(5);
+	   if(key2==0)
+	   {
+	    while(!key2);
+	    if(zkb>0)  
+		 {
+		   zkb--;
+		 }
+	
+	   } 
+	 }   
+
+  }
+ void main()	//主函数
+
+  {
+    
+    zkb=2;
+    init();
+	while(1)
+	{
+	 keyscan();
+	}
+  }
+
+void time0(void) interrupt 1	 //中断函数
+  {
+    
+    TH0=(65536-10)/256;
+	TL0=(65536-10)%256;
+	++i;
+	if(i>10)
+	  {
+	  i=0;
+	  };
+
+	if(i<=zkb)
+	{
+	 P2_0=1;
+	}
+	else P2_0=0;
+
+
+  }
